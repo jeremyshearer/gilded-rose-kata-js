@@ -1,5 +1,5 @@
 class Item {
-  constructor(name, sellIn, quality){
+  constructor(name, sellIn, quality) {
     this.name = name;
     this.sellIn = sellIn;
     this.quality = quality;
@@ -7,61 +7,101 @@ class Item {
 }
 
 class Shop {
-  constructor(items=[]){
+  constructor(items = []) {
     this.items = items;
   }
   updateQuality() {
-    for (let i = 0; i < this.items.length; i++) {
-      if (this.items[i].name != 'Aged Brie' && this.items[i].name != 'Backstage passes to a TAFKAL80ETC concert') {
-        if (this.items[i].quality > 0) {
-          if (this.items[i].name != 'Sulfuras, Hand of Ragnaros') {
-            this.items[i].quality = this.items[i].quality - 1;
-          }
-        }
-      } else {
-        if (this.items[i].quality < 50) {
-          this.items[i].quality = this.items[i].quality + 1;
-          if (this.items[i].name == 'Backstage passes to a TAFKAL80ETC concert') {
-            if (this.items[i].sellIn < 11) {
-              if (this.items[i].quality < 50) {
-                this.items[i].quality = this.items[i].quality + 1;
-              }
-            }
-            if (this.items[i].sellIn < 6) {
-              if (this.items[i].quality < 50) {
-                this.items[i].quality = this.items[i].quality + 1;
-              }
-            }
-          }
-        }
-      }
-      if (this.items[i].name != 'Sulfuras, Hand of Ragnaros') {
-        this.items[i].sellIn = this.items[i].sellIn - 1;
-      }
-      if (this.items[i].sellIn < 0) {
-        if (this.items[i].name != 'Aged Brie') {
-          if (this.items[i].name != 'Backstage passes to a TAFKAL80ETC concert') {
-            if (this.items[i].quality > 0) {
-              if (this.items[i].name != 'Sulfuras, Hand of Ragnaros') {
-                this.items[i].quality = this.items[i].quality - 1;
-              }
-            }
-          } else {
-            this.items[i].quality = this.items[i].quality - this.items[i].quality;
-          }
-        } else {
-          if (this.items[i].quality < 50) {
-            this.items[i].quality = this.items[i].quality + 1;
-          }
-        }
-      }
-    }
+    this.items.forEach((item) => {
+      const updater = this.buildQualityUpdater(item);
+      updater.updateQuality();
+    });
 
     return this.items;
+  }
+
+  buildQualityUpdater(item) {
+    const updaterMap = {
+      "Aged Brie": AgedBrieQualityUpdater,
+      "Backstage passes to a TAFKAL80ETC concert": BackstagePassQualityUpdater,
+      "Sulfuras, Hand of Ragnaros": LegendaryUpdater,
+      "Conjured Item": ConjuredQualityUpdater,
+    };
+    const UpdaterClass = updaterMap[item.name] || QualityUpdater;
+    return new UpdaterClass(item);
+  }
+}
+
+class QualityUpdater {
+  constructor(item) {
+    this.item = item;
+  }
+
+  updateQuality() {
+    this.decreaseQuality();
+    this.item.sellIn -= 1;
+    if (this.item.sellIn < 0) {
+      this.decreaseQuality();
+    }
+  }
+
+  increaseQuality() {
+    if (this.item.quality < 50) {
+      this.item.quality += 1;
+    }
+  }
+
+  decreaseQuality() {
+    if (this.item.quality > 0) {
+      this.item.quality = this.item.quality - 1;
+    }
+  }
+}
+
+class LegendaryUpdater extends QualityUpdater {
+  updateQuality() {
+    return;
+  }
+}
+
+class AgedBrieQualityUpdater extends QualityUpdater {
+  updateQuality() {
+    this.increaseQuality();
+    this.item.sellIn -= 1;
+    if (this.item.sellIn < 0) {
+      this.increaseQuality();
+    }
+  }
+}
+
+class BackstagePassQualityUpdater extends QualityUpdater {
+  updateQuality() {
+    this.increaseQuality();
+    if (this.item.sellIn < 11) {
+      this.increaseQuality();
+    }
+    if (this.item.sellIn < 6) {
+      this.increaseQuality();
+    }
+    this.item.sellIn -= 1;
+    if (this.item.sellIn < 0) {
+      this.item.quality = 0;
+    }
+  }
+}
+
+class ConjuredQualityUpdater extends QualityUpdater {
+  updateQuality() {
+    this.decreaseQuality();
+    this.decreaseQuality();
+    this.item.sellIn -= 1;
+    if (this.item.sellIn < 0) {
+      this.decreaseQuality();
+      this.decreaseQuality();
+    }
   }
 }
 
 module.exports = {
   Item,
-  Shop
-}
+  Shop,
+};

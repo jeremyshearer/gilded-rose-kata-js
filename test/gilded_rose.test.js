@@ -30,11 +30,11 @@ describe("Gilded Rose", () => {
     ["Sulfuras, Hand of Ragnaros", 0, 80, 80],
     ["Sulfuras, Hand of Ragnaros", 1, 80, 80],
     ["Sulfuras, Hand of Ragnaros", 1, 50, 50],
-    // ["Conjured Item", 1, 2, 0],
-    // ["Conjured Item", 1, 1, 0],
-    // ["Conjured Item", 1, 0, 0],
-    // ["Conjured Item", 0, 4, 0],
-    // ["Conjured Item", 0, 2, 0],
+    ["Conjured Item", 1, 2, 0],
+    ["Conjured Item", 1, 1, 0],
+    ["Conjured Item", 1, 0, 0],
+    ["Conjured Item", 0, 4, 0],
+    ["Conjured Item", 0, 2, 0],
   ])(
     "new Item(%s, %i, %i) has quality: %i",
     (name, sellIn, initialQuality, expectedQuality) => {
